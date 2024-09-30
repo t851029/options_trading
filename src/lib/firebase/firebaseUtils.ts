@@ -52,3 +52,22 @@ export const uploadFile = async (file: File, path: string) => {
   await uploadBytes(storageRef, file);
   return getDownloadURL(storageRef);
 };
+
+// New functions
+import { db } from './firebase';
+import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
+
+export const addNote = async (note: { text: string; createdAt: string; userId: string }) => {
+  try {
+    await addDoc(collection(db, 'notes'), note);
+  } catch (error) {
+    console.error('Error adding note: ', error);
+  }
+};
+
+export const getNotes = async (userId: string) => {
+  const notesRef = collection(db, 'notes');
+  const q = query(notesRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
