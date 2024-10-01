@@ -8,39 +8,28 @@ interface Note {
   createdAt: string;
 }
 
-const NotesList = () => {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const { user } = useAuth();
+interface NotesListProps {
+  notes: Note[];
+}
 
-  useEffect(() => {
-    if (user) {
-      const fetchNotes = async () => {
-        const userNotes = await getNotes(user.uid);
-        setNotes(userNotes);
-      };
-      fetchNotes();
-    }
-  }, [user]);
-
+export default function NotesList({ notes }: NotesListProps) {
   return (
-    <div>
+    <div className="mt-8 w-full max-w-2xl">
       <h2 className="text-2xl font-bold mb-4">Your Notes</h2>
       {notes.length === 0 ? (
-        <p>No notes yet. Start recording to create your first note!</p>
+        <p className="text-gray-500">No notes yet. Start recording to create your first note!</p>
       ) : (
         <ul className="space-y-4">
           {notes.map((note) => (
-            <li key={note.id} className="bg-gray-100 p-4 rounded-lg">
-              <p className="text-gray-600 text-sm mb-2">
+            <li key={note.id} className="bg-white shadow rounded-lg p-4">
+              <p className="text-gray-800">{note.text}</p>
+              <p className="text-sm text-gray-500 mt-2">
                 {new Date(note.createdAt).toLocaleString()}
               </p>
-              <p>{note.text}</p>
             </li>
           ))}
         </ul>
       )}
     </div>
   );
-};
-
-export default NotesList;
+}
