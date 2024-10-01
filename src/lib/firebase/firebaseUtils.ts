@@ -11,6 +11,9 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  query,
+  where,
+  orderBy,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -53,11 +56,8 @@ export const uploadFile = async (file: File, path: string) => {
   return getDownloadURL(storageRef);
 };
 
-// New functions
-import { db } from './firebase';
-import { collection, addDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
-
-export const addNote = async (note) => {
+// Note functions
+export const addNote = async (note: { text: string; createdAt: string; userId: string }) => {
   try {
     await addDoc(collection(db, 'notes'), note);
   } catch (error) {
@@ -65,17 +65,17 @@ export const addNote = async (note) => {
   }
 };
 
-export const getNotes = async (userId) => {
+export const getNotes = async (userId: string) => {
   try {
     const q = query(
       collection(db, 'notes'),
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
-    )
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (error) {
-    console.error('Error getting notes:', error)
-    return []
+    console.error('Error getting notes:', error);
+    return [];
   }
 };
