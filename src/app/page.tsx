@@ -5,7 +5,7 @@ import { useDeepgram } from '@/lib/contexts/DeepgramContext'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { addNote, getNotes } from '@/lib/firebase/firebaseUtils'
 import VoiceRecorder from '@/components/VoiceRecorder'
-import NotesList from '@/components/NotesList'
+import NotesList from '@/app/components/NotesList'
 
 export default function Home() {
   const [notes, setNotes] = useState([])
