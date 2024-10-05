@@ -1,8 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Message } from 'ai';
-import ReactMarkdown from 'react-markdown';
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
 
 interface MessageListProps {
   messages: Message[];
@@ -11,29 +15,24 @@ interface MessageListProps {
 
 const MessageList: React.FC<MessageListProps> = ({ messages, onCopyMessage }) => {
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="space-y-4 p-4">
       {messages.map((message) => (
         <div
           key={message.id}
-          className={`flex ${
-            message.role === 'user' ? 'justify-end' : 'justify-start'
+          className={`p-4 rounded-lg ${
+            message.role === 'user' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-100'
           }`}
         >
-          <div
-            className={`max-w-3/4 p-3 rounded-lg relative group ${
-              message.role === 'user'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-200 text-black'
-            }`}
-          >
-            <ReactMarkdown>{message.content}</ReactMarkdown>
+          <div className="flex justify-between items-start">
+            <span className="font-bold">{message.role === 'user' ? 'You' : 'Assistant'}</span>
             <button
               onClick={() => onCopyMessage(message.content)}
-              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gray-800 text-white px-2 py-1 rounded text-xs"
+              className="text-xs bg-gray-600 hover:bg-gray-500 text-white px-2 py-1 rounded transition duration-150 ease-in-out"
             >
               Copy
             </button>
           </div>
+          <p className="mt-2">{message.content}</p>
         </div>
       ))}
     </div>

@@ -9,18 +9,19 @@ interface ModelSelectorProps {
 
 const ModelSelector: React.FC<ModelSelectorProps> = ({ model, onModelChange }) => {
   return (
-    <div className="p-4 border-b">
-      <label className="flex items-center space-x-2">
-        <span>Select AI Model:</span>
-        <select
-          value={model}
-          onChange={(e) => onModelChange(e.target.value as 'openai' | 'anthropic')}
-          className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="openai">OpenAI</option>
-          <option value="anthropic">Anthropic</option>
-        </select>
+    <div className="flex items-center space-x-2">
+      <label htmlFor="model-select" className="text-gray-300 font-medium">
+        AI Model:
       </label>
+      <select
+        id="model-select"
+        value={model}
+        onChange={(e) => onModelChange(e.target.value as 'openai' | 'anthropic')}
+        className="bg-gray-700 text-white border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="openai" className="bg-gray-700">OpenAI</option>
+        <option value="anthropic" className="bg-gray-700">Anthropic</option>
+      </select>
     </div>
   );
 };
