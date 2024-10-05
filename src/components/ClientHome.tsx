@@ -4,11 +4,17 @@ import { useState, useEffect } from 'react'
 import { useDeepgram } from '@/lib/contexts/DeepgramContext'
 import { useAuth } from '@/lib/hooks/useAuth'
 import { addNote, getNotes } from '@/lib/firebase/firebaseUtils'
-import VoiceRecorder from '@/app/components/VoiceRecorder'
-import NotesList from '@/app/components/NotesList'
+import VoiceRecorder from '@/components/VoiceRecorder'
+import NotesList from '@/components/NotesList'
 
 export default function ClientHome() {
-  const [notes, setNotes] = useState<any[]>([])
+  interface Note {
+    id: string;
+    text: string;
+    createdAt: string;
+  }
+
+  const [notes, setNotes] = useState<Note[]>([])
   const { user } = useAuth()
   const { deepgramClient } = useDeepgram()
 

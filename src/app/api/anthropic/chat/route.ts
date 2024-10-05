@@ -1,15 +1,23 @@
-import { anthropic } from "@ai-sdk/anthropic";
-import { convertToCoreMessages, streamText } from "ai";
+import { AnthropicStream, StreamingTextResponse } from 'ai';
+import { anthropic } from '@anthropic-ai/sdk';
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
-  const result = await streamText({
-    model: anthropic("claude-3-5-sonnet-20240620"),
-    messages: convertToCoreMessages(messages),
-    system: "You are a helpful AI assistant",
+
+  const anthropicClient = new anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
   });
 
-  return result.toDataStreamResponse();
+  const response = await anthropicClient.messages.create({
+    model: 'claude-3-sonnet-20240229',
+    max_tokens: 1000,
+    messages,
+    stream: true,
+  });
+
+  const stream = AnthropicStream(response);
+
+  return new StreamingTextResponse(stream);
 }

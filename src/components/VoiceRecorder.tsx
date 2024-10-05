@@ -1,56 +1,68 @@
-'use client';
+import { useState, useRef, useCallback } from 'react';
+import { LiveTranscription } from '@deepgram/sdk';
 
-import { useState, useEffect } from 'react';
-import { useDeepgram } from '../lib/contexts/DeepgramContext';
-import { addDocument } from '../lib/firebase/firebaseUtils';
-import { motion } from 'framer-motion';
+interface VoiceRecorderProps {
+  onNewNote: (transcription: string) => void
+  deepgramClient: LiveTranscription | null
+}
 
-export default function VoiceRecorder() {
+export default function VoiceRecorder({ onNewNote, deepgramClient }: VoiceRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
-  const { connectToDeepgram, disconnectFromDeepgram, connectionState, realtimeTranscript } = useDeepgram();
+  const [transcription, setTranscription] = useState('');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
-  const handleStartRecording = async () => {
-    await connectToDeepgram();
-    setIsRecording(true);
-  };
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      setIsRecording(true);
 
-  const handleStopRecording = async () => {
-    disconnectFromDeepgram();
-    setIsRecording(false);
-    
-    // Save the note to Firebase
-    if (realtimeTranscript) {
-      await addDocument('notes', {
-        text: realtimeTranscript,
-        timestamp: new Date().toISOString(),
-      });
+      if (deepgramClient) {
+        deepgramClient.addListener('transcriptReceived', (transcription) => {
+          setTranscription((prev) => prev + ' ' + transcription.channel.alternatives[0].transcript);
+        });
+
+        deepgramClient.start();
+      }
+
+      mediaRecorderRef.current.start();
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
     }
-  };
+  }, [deepgramClient]);
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+
+      if (deepgramClient) {
+        deepgramClient.finish();
+      }
+
+      onNewNote(transcription.trim());
+      setTranscription('');
+    }
+  }, [isRecording, deepgramClient, onNewNote, transcription]);
 
   return (
-    <div className="w-full max-w-md">
+    <div className="flex flex-col items-center">
       <button
-        onClick={isRecording ? handleStopRecording : handleStartRecording}
-        className={`w-full py-2 px-4 rounded-full ${
+        onClick={isRecording ? stopRecording : startRecording}
+        className={`px-4 py-2 rounded-full ${
           isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white font-bold`}
+        } text-white font-bold transition-colors`}
       >
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
       {isRecording && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <motion.div
-            animate={{
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-8 h-8 bg-blue-500 rounded-full mx-auto mb-4"
-          />
-          <p className="text-sm text-gray-600">{realtimeTranscript}</p>
+        <div className="mt-4">
+          <div className="w-16 h-16 border-4 border-blue-500 rounded-full animate-pulse"></div>
+        </div>
+      )}
+      {transcription && (
+        <div className="mt-4 p-4 bg-gray-100 rounded-lg max-w-md">
+          <p className="text-gray-700">{transcription}</p>
         </div>
       )}
     </div>

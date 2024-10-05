@@ -1,7 +1,12 @@
-import dynamic from 'next/dynamic'
+import React from 'react';
+import ChatInterface from './components/ChatInterface';
 
-const ClientHome = dynamic(() => import('@/components/ClientHome'), { ssr: false })
+const Home: React.FC = () => {
+  return (
+    <main className="min-h-screen bg-gray-100">
+      <ChatInterface />
+    </main>
+  );
+};
 
-export default function Home() {
-  return <ClientHome />
-}
+export default Home;
